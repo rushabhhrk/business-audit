@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0a0a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>The AI Audit — Find Where Your Business is Bleeding Money</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-soft: #111111;
+    --ink: #f5f1e8;
+    --ink-dim: #8a857a;
+    --accent: #d4ff00;
+    --accent-warm: #ff5722;
+    --line: #1f1f1f;
+    --card: #141414;
+    --pad-x: 20px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body { min-height: 100vh; min-height: 100dvh; }
+  button, input, textarea { font-family: inherit; }
+
+  .grain {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 100;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 var(--pad-x);
+    width: 100%;
+  }
+
+  /* ---------------- HERO ---------------- */
+  .hero {
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: calc(60px + var(--safe-top)) 0 calc(40px + var(--safe-bottom));
+    position: relative;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 24px;
+    display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .badge::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px var(--accent);
+    animation: pulse 1.6s infinite; flex-shrink: 0;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  h1.hero-title {
+    font-family: 'Instrument Serif', serif; font-weight: 400;
+    font-size: clamp(40px, 11vw, 96px);
+    line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 24px;
+  }
+  h1.hero-title em { font-style: italic; color: var(--accent); }
+
+  .hero-sub {
+    font-size: clamp(16px, 4vw, 21px);
+    max-width: 580px; color: var(--ink-dim);
+    margin-bottom: 36px; line-height: 1.55;
+  }
+
+  .cta-primary {
+    background: var(--accent); color: #000; border: none;
+    padding: 20px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; border-radius: 0;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    width: 100%; max-width: 360px; min-height: 56px;
+  }
+  .cta-primary:hover, .cta-primary:focus {
+    background: var(--ink);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--accent);
+  }
+  .cta-primary:active { transform: translate(0, 0); box-shadow: 3px 3px 0 var(--accent); }
+
+  .meta-row {
+    display: flex; gap: 24px; margin-top: 48px; flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .meta-row span strong { color: var(--ink); }
+
+  /* ---------------- QUIZ ---------------- */
+  .quiz {
+    display: none;
+    min-height: 100vh; min-height: 100dvh;
+    padding: calc(40px + var(--safe-top)) 0 calc(140px + var(--safe-bottom));
+    position: relative;
+  }
+  .quiz.active { display: block; }
+
+  .progress-bar { height: 2px; background: var(--line); margin-bottom: 40px; position: relative; }
+  .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; }
+  .progress-text {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-dim);
+    margin-bottom: 10px; display: flex; justify-content: space-between;
+  }
+
+  .question-block { display: none; }
+  .question-block.active { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--accent); letter-spacing: 0.15em; margin-bottom: 14px;
+  }
+  .q-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(24px, 6vw, 42px);
+    line-height: 1.18; margin-bottom: 32px; letter-spacing: -0.01em;
+  }
+  .q-hint {
+    color: var(--ink-dim); font-size: 14px; margin-top: -22px; margin-bottom: 28px;
+    font-style: italic;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .option {
+    background: var(--card); border: 1px solid var(--line);
+    padding: 18px 20px; cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    font-family: 'Fraunces', serif; font-size: 16px; color: var(--ink);
+    text-align: left;
+    display: flex; align-items: flex-start; gap: 14px;
+    width: 100%; min-height: 56px; line-height: 1.4;
+  }
+  .option:hover { border-color: var(--accent); background: #181818; }
+  .option:active { transform: scale(0.99); }
+  .option.selected { border-color: var(--accent); background: rgba(212, 255, 0, 0.06); }
+  .option-marker {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--ink-dim); width: 20px; flex-shrink: 0; padding-top: 3px;
+  }
+  .option.selected .option-marker { color: var(--accent); }
+  .option-text { flex: 1; }
+
+  /* "Other" toggle */
+  .other-wrap { margin-top: 12px; }
+  .other-toggle {
+    background: transparent; color: var(--ink-dim);
+    border: 1px dashed var(--line);
+    padding: 14px 18px; width: 100%;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    text-align: left;
+  }
+  .other-toggle:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .other-toggle.active { color: var(--accent); border-color: var(--accent); border-style: solid; }
+  .other-input {
+    width: 100%; background: var(--card); border: 1px solid var(--accent);
+    padding: 16px 20px; color: var(--ink);
+    font-family: 'Fraunces', serif; font-size: 16px;
+    margin-top: 8px; transition: border-color 0.2s;
+    -webkit-appearance: none; appearance: none; border-radius: 0;
+    display: none;
+  }
+  .other-input.visible { display: block; }
+  .other-input:focus { outline: none; border-color: var(--accent); }
+
+  .text-input, .textarea-input {
+    width: 100%; background: var(--card); border: 1px solid var(--line);
+    padding: 18px 20px; color: var(--ink);
+    font-family: 'Fraunces', serif; font-size: 16px;
+    margin-bottom: 24px; transition: border-color 0.2s;
+    -webkit-appearance: none; appearance: none; border-radius: 0;
+  }
+  .textarea-input { min-height: 140px; resize: vertical; line-height: 1.5; }
+  .text-input:focus, .textarea-input:focus { outline: none; border-color: var(--accent); }
+
+  /* Sticky bottom nav */
+  .nav-row {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, var(--bg) 70%, rgba(10,10,10,0));
+    padding: 20px var(--pad-x) calc(20px + var(--safe-bottom));
+    display: flex; z-index: 50;
+  }
+  .nav-row-inner {
+    width: 100%; max-width: 880px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .btn-secondary {
+    background: transparent; color: var(--ink-dim);
+    border: 1px solid var(--line); padding: 14px 22px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    min-height: 50px; flex-shrink: 0;
+  }
+  .btn-secondary:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-next {
+    background: var(--accent); color: #000; border: none;
+    padding: 14px 24px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    min-height: 50px; flex: 1; max-width: 280px;
+  }
+  .btn-next:hover { transform: translateX(2px); }
+  .btn-next:active { transform: scale(0.98); }
+  .btn-next:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  /* ---------------- LOADING ---------------- */
+  .loading {
+    display: none;
+    min-height: 100vh; min-height: 100dvh;
+    flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; padding: 40px var(--pad-x);
+  }
+  .loading.active { display: flex; }
+
+  .scanner {
+    width: min(280px, 80vw); height: 4px; background: var(--line);
+    position: relative; overflow: hidden; margin-bottom: 32px;
+  }
+  .scanner::after {
+    content: ''; position: absolute;
+    width: 60px; height: 100%; background: var(--accent);
+    box-shadow: 0 0 16px var(--accent);
+    animation: scan 1.4s ease-in-out infinite;
+  }
+  @keyframes scan { 0% { left: -60px; } 100% { left: 100%; } }
+
+  .loading-status {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--ink-dim); letter-spacing: 0.05em;
+    min-height: 40px; line-height: 1.5; max-width: 320px;
+  }
+  .loading-status .blink { color: var(--accent); animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ===================================================================
+     RESULTS — REIMAGINED AS "DIAGNOSTIC FILE"
+     ================================================================== */
+  .results {
+    display: none;
+    padding: calc(40px + var(--safe-top)) 0 calc(40px + var(--safe-bottom));
+  }
+  .results.active { display: block; }
+
+  /* File header */
+  .file-tag {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 14px; border-bottom: 1px dashed var(--line);
+    margin-bottom: 28px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+    flex-wrap: wrap; gap: 10px;
+  }
+  .file-tag .stamp {
+    color: var(--accent-warm);
+    border: 1px solid var(--accent-warm); padding: 4px 10px;
+  }
+
+  .file-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(38px, 10vw, 72px);
+    line-height: 0.95; letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .file-title em { font-style: italic; color: var(--accent); }
+
+  .file-subject {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: 32px;
+  }
+  .file-subject strong { color: var(--ink); }
+
+  /* The Verdict — big top section */
+  .verdict {
+    background: var(--card); border: 1px solid var(--line);
+    padding: 28px 24px; margin-bottom: 32px;
+    position: relative; overflow: hidden;
+  }
+  .verdict::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--accent-warm);
+  }
+  .verdict-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: 12px;
+  }
+  .verdict-text {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(22px, 5.5vw, 32px);
+    line-height: 1.25; letter-spacing: -0.01em;
+  }
+  .verdict-text em { font-style: italic; color: var(--accent-warm); }
+
+  /* The Leak Ledger — itemized list of money leaks */
+  .ledger {
+    margin-bottom: 32px;
+    border: 1px solid var(--line);
+    background: var(--card);
+  }
+  .ledger-header {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .ledger-header span:last-child { color: var(--accent-warm); }
+
+  .leak-item {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px; align-items: flex-start;
+  }
+  .leak-item:last-child { border-bottom: none; }
+  .leak-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(18px, 4.5vw, 22px);
+    line-height: 1.25; margin-bottom: 6px;
+  }
+  .leak-desc {
+    color: var(--ink-dim); font-size: 14px; line-height: 1.5;
+  }
+  .leak-cost {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-warm);
+    font-size: 13px; font-weight: 700;
+    text-align: right; white-space: nowrap;
+    padding-top: 4px;
+  }
+
+  .ledger-total {
+    padding: 18px 22px;
+    background: rgba(255, 87, 34, 0.04);
+    border-top: 2px solid var(--accent-warm);
+    display: flex; justify-content: space-between; align-items: baseline;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .ledger-total-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-dim);
+  }
+  .ledger-total-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(28px, 7vw, 40px);
+    color: var(--accent-warm); line-height: 1;
+    font-style: italic;
+  }
+  .ledger-disclaimer {
+    padding: 10px 22px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    letter-spacing: 0.1em; color: var(--ink-dim);
+    border-top: 1px dashed var(--line);
+  }
+
+  /* Strengths — minimal sidebar style */
+  .strengths-block {
+    margin-bottom: 32px;
+    padding: 22px 24px;
+    border-left: 3px solid var(--accent);
+    background: rgba(212, 255, 0, 0.03);
+  }
+  .strengths-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 12px;
+  }
+  .strength-line {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(17px, 4.2vw, 19px);
+    line-height: 1.4; padding: 6px 0;
+    color: var(--ink);
+  }
+  .strength-line + .strength-line { border-top: 1px solid var(--line); }
+
+  /* The Sealed Envelope — CTA */
+  .envelope-section {
+    margin: 48px 0 32px;
+    text-align: center;
+    padding: 0 4px;
+  }
+  .envelope-meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: 20px;
+  }
+  .envelope-meta span { color: var(--accent); }
+
+  .envelope {
+    background: var(--card);
+    border: 1px solid var(--accent);
+    padding: 32px 24px;
+    position: relative;
+    background-image:
+      repeating-linear-gradient(45deg, transparent 0, transparent 10px, rgba(212,255,0,0.04) 10px, rgba(212,255,0,0.04) 20px);
+  }
+  .envelope::before {
+    content: '';
+    position: absolute; top: -1px; left: -1px; right: -1px;
+    height: 24px;
+    background:
+      linear-gradient(135deg, var(--bg) 50%, transparent 50%) 0 0/12px 24px,
+      linear-gradient(225deg, var(--bg) 50%, transparent 50%) 0 0/12px 24px;
+    background-repeat: repeat-x;
+  }
+  .envelope-stamp {
+    position: absolute; top: 12px; right: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    letter-spacing: 0.2em; color: var(--accent);
+    border: 1px solid var(--accent); padding: 3px 8px;
+    transform: rotate(4deg);
+  }
+
+  .envelope-content { padding-top: 12px; }
+  .envelope-h {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(24px, 6.5vw, 38px);
+    line-height: 1.15; margin-bottom: 14px;
+  }
+  .envelope-h em { font-style: italic; color: var(--accent); }
+  .envelope-text {
+    color: var(--ink-dim);
+    font-size: clamp(14px, 4vw, 16px);
+    max-width: 480px; margin: 0 auto 24px;
+    line-height: 1.55;
+  }
+
+  .envelope-text strong {
+    color: var(--ink); font-weight: 600;
+  }
+
+  /* The "fixable" checklist */
+  .fix-grid {
+    display: flex; flex-direction: column; gap: 8px;
+    margin: 0 auto 28px; max-width: 420px; text-align: left;
+  }
+  .fix-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 14px;
+    background: rgba(212, 255, 0, 0.04);
+    border-left: 2px solid var(--accent);
+    font-size: clamp(14px, 3.8vw, 15px);
+    line-height: 1.4;
+  }
+  .fix-icon {
+    color: var(--accent);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .fix-text { color: var(--ink); }
+
+  .cta-microline {
+    margin-top: 16px;
+    color: var(--ink-dim);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .whatsapp-btn {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    background: #25D366; color: #000;
+    padding: 18px 24px; text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 0.25s ease; border: none; cursor: pointer;
+    width: 100%; max-width: 340px; min-height: 56px; line-height: 1.2;
+  }
+  .whatsapp-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--accent);
+  }
+  .whatsapp-btn:active { transform: translate(0, 0); box-shadow: 3px 3px 0 var(--accent); }
+  .whatsapp-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .footer-note {
+    text-align: center; color: var(--ink-dim);
+    font-size: 11px; margin-top: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em; padding: 0 10px;
+  }
+
+  /* ---------------- DESKTOP TUNING ---------------- */
+  @media (min-width: 768px) {
+    :root { --pad-x: 32px; }
+    .hero { padding: 100px 0 80px; }
+    .hero-sub { margin-bottom: 48px; }
+    .cta-primary { width: auto; padding: 22px 36px; }
+    .meta-row { gap: 40px; font-size: 11px; }
+    .quiz { padding: 80px 0 80px; }
+    .progress-bar { margin-bottom: 60px; }
+    .progress-text, .badge, .q-num { font-size: 11px; }
+    .options { gap: 10px; }
+    .option { padding: 20px 24px; font-size: 17px; gap: 16px; align-items: center; }
+    .option-marker { padding-top: 0; }
+    .text-input, .textarea-input, .other-input { padding: 20px 24px; font-size: 17px; }
+
+    .nav-row { position: static; background: none; padding: 0; margin-top: 8px; }
+    .nav-row-inner { max-width: none; }
+    .btn-secondary { padding: 16px 28px; }
+    .btn-next { padding: 16px 32px; flex: 0 0 auto; }
+
+    .results { padding: 80px 0; }
+    .verdict { padding: 36px 32px; }
+    .leak-item { padding: 22px 28px; }
+    .ledger-header, .ledger-total { padding: 18px 28px; }
+    .strengths-block { padding: 28px 32px; }
+    .envelope { padding: 44px 36px; }
+    .whatsapp-btn { padding: 22px 36px; font-size: 14px; max-width: 380px; }
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    .text-input, .textarea-input, .other-input { font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- =================== HERO =================== -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="badge">Free · 3 minutes · No email needed</div>
+    <h1 class="hero-title">
+      Where is your<br>
+      business <em>bleeding<br>money?</em>
+    </h1>
+    <p class="hero-sub">
+      Restaurants, wholesalers, brokers, manufacturers, clinics — every business is leaking time and rupees somewhere. Take this 3-minute audit. We'll itemize the leaks.
+    </p>
+    <button class="cta-primary" onclick="startQuiz()">Start the audit →</button>
+
+    <div class="meta-row">
+      <span><strong>Adaptive</strong> questions</span>
+      <span><strong>Itemized</strong> leak report</span>
+      <span><strong>0</strong> generic advice</span>
+    </div>
+  </div>
+</section>
+
+<!-- =================== QUIZ =================== -->
+<section class="quiz" id="quiz">
+  <div class="container">
+    <div class="progress-text">
+      <span>The Audit</span>
+      <span id="progressLabel">01</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionContainer"></div>
+  </div>
+</section>
+
+<!-- =================== LOADING =================== -->
+<section class="loading" id="loading">
+  <div class="scanner"></div>
+  <div class="loading-status" id="loadingStatus">Compiling your file<span class="blink">_</span></div>
+</section>
+
+<!-- =================== RESULTS — DIAGNOSTIC FILE =================== -->
+<section class="results" id="results">
+  <div class="container">
+
+    <div class="file-tag">
+      <span>FILE / <span id="fileNo">000-000</span></span>
+      <span class="stamp">CONFIDENTIAL</span>
+      <span id="fileDate">DATE / —</span>
+    </div>
+
+    <div class="file-title">The <em>Diagnosis.</em></div>
+    <div class="file-subject">Subject — <strong id="fileSubject">Your business</strong></div>
+
+    <!-- The Verdict -->
+    <div class="verdict">
+      <div class="verdict-label">⚠ The Verdict</div>
+      <div class="verdict-text" id="verdictText">—</div>
+    </div>
+
+    <!-- The Leak Ledger -->
+    <div class="ledger">
+      <div class="ledger-header">
+        <span>The Leak Ledger</span>
+        <span>Est. monthly cost</span>
+      </div>
+      <div id="leakItems"></div>
+      <div class="ledger-total">
+        <span class="ledger-total-label">Total estimated leak / month</span>
+        <span class="ledger-total-value" id="totalLeak">—</span>
+      </div>
+      <div class="ledger-disclaimer">
+        * Conservative estimate based on your inputs. Actual figures usually run higher.
+      </div>
+    </div>
+
+    <!-- Strengths -->
+    <div class="strengths-block">
+      <div class="strengths-label">✓ What's working in your favour</div>
+      <div id="strengthLines"></div>
+    </div>
+
+    <!-- The Good News + CTA -->
+    <div class="envelope-section">
+      <div class="envelope-meta">— THE GOOD NEWS —</div>
+
+      <div class="envelope">
+        <div class="envelope-stamp">FIXABLE</div>
+        <div class="envelope-content">
+          <h3 class="envelope-h">Every leak above can be <em>plugged.</em></h3>
+          <p class="envelope-text">
+            The numbers feel scary, but here's the truth — <strong>none of these problems are unsolvable.</strong> Each one has been fixed before, for businesses just like yours. The only question is which one we tackle first, and how fast you start saving.
+          </p>
+
+          <div class="fix-grid">
+            <div class="fix-row">
+              <span class="fix-icon">✓</span>
+              <span class="fix-text">A 30-minute call. Free. No commitment.</span>
+            </div>
+            <div class="fix-row">
+              <span class="fix-icon">✓</span>
+              <span class="fix-text">We map exactly which AI systems fix YOUR leaks.</span>
+            </div>
+            <div class="fix-row">
+              <span class="fix-icon">✓</span>
+              <span class="fix-text">You'll know what it'll cost and what you'll save.</span>
+            </div>
+            <div class="fix-row">
+              <span class="fix-icon">✓</span>
+              <span class="fix-text">If we're not the right fit, we'll say so.</span>
+            </div>
+          </div>
+
+          <a class="whatsapp-btn" id="whatsappCta" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Talk to us — it's free
+          </a>
+
+          <div class="cta-microline">No sales pitch. No 47-page PDFs. Just a 30-min conversation about your business.</div>
+        </div>
+      </div>
+
+      <p class="footer-note">Stop bleeding rupees. Start the conversation.</p>
+    </div>
+
+  </div>
+</section>
+
+<script>
+/* =====================================================================
+   QUESTION ENGINE — Adaptive flow.
+   Q1 picks industry; Q2 picks tech-maturity; remaining questions
+   are pulled from the relevant industry pack.
+   ===================================================================== */
+
+// Industry pack definitions
+const INDUSTRIES = [
+  { id: 'restaurant',    label: 'Restaurant / Cafe / Cloud Kitchen' },
+  { id: 'clinic',        label: 'Clinic / Hospital / Healthcare' },
+  { id: 'retail',        label: 'Retail store / E-commerce' },
+  { id: 'wholesale',     label: 'Wholesaler / Distributor (food, hardware, flooring, etc.)' },
+  { id: 'broker',        label: 'Broker / Commission agent (grain, oil, commodities)' },
+  { id: 'manufacturing', label: 'Manufacturing / Production unit' },
+  { id: 'realestate',    label: 'Real estate / Property' },
+  { id: 'education',     label: 'Coaching / Tuitions / Education' },
+  { id: 'salon',         label: 'Salon / Spa / Local services' },
+  { id: 'consultant',    label: 'Coach / Consultant / Solopreneur' }
+];
+
+// Universal Q2 — tech maturity
+const TECH_QUESTION = {
+  key: 'tech_level',
+  question: "Where's your business currently with technology?",
+  hint: "Be honest — it changes the prescription completely.",
+  options: [
+    "We run on paper, ledgers, WhatsApp memory",
+    "Basic tools — Excel / Tally / a software or two",
+    "Decent stack — multiple tools, but they don't talk to each other",
+    "We're already pretty digital — looking for AI to level up"
+  ]
+};
+
+// Per-industry question packs (5 questions each, all with Other allowed)
+const PACKS = {
+
+  restaurant: [
+    { key: 'support', question: "Pull up your phone right now. How many WhatsApp messages from customers are unread or not yet replied to?",
+      hint: "The number itself is the answer.",
+      options: ["Zero — we're on top of it","A handful — within today","Dozens — some from yesterday","I'd rather not look"] },
+    { key: 'after_hours', question: "Last Saturday night, how many people messaged your restaurant after closing?",
+      hint: "And how many of those came back the next day?",
+      options: ["We have an auto-system, all replied","A few waited till morning","Honestly, no idea — and that's the problem","We don't even check after-hours messages"] },
+    { key: 'orders', question: "When a customer orders something, how many places does that information have to be re-entered before food reaches them?",
+      options: ["One place — clean system","Two places (e.g., Swiggy → kitchen)","Three or more — phone, app, kitchen, billing","Honestly, it's chaos — different staff do it differently"] },
+    { key: 'reviews', question: "Open Google. Search your restaurant name. When was the last review you replied to?",
+      options: ["This week","Within a month","Can't remember","I haven't replied to any"] },
+    { key: 'biggest_pain', question: "What's the ONE thing about running this restaurant that makes you dread Monday mornings?",
+      type: 'text', placeholder: "Be honest — staff, wastage, no-shows, cash flow, anything." }
+  ],
+
+  clinic: [
+    { key: 'appointments', question: "If your front-desk person was sick tomorrow and didn't tell anyone, how would the day actually go?",
+      hint: "The answer reveals how much your operations depend on one person's memory.",
+      options: ["Smooth — it's all in the system","Some confusion, but manageable","Honestly, it would be a mess","I don't want to think about it"] },
+    { key: 'support', question: "How many times this week did the same patient call to ask the same thing — timings, address, fees?",
+      options: ["Rarely happens","A few times — manageable","Constantly — it's most of our calls","I've stopped counting"] },
+    { key: 'no_shows', question: "Think of last week. How many appointment slots stayed empty because someone didn't show up?",
+      hint: "Each empty slot = your full fee, gone.",
+      options: ["Almost none","A few","A bunch — it's a real problem","More than I'd like to admit"] },
+    { key: 'followup', question: "A patient came in 6 months ago and never returned. Do you have any way of knowing — and reaching out?",
+      options: ["Yes, we have a recall system","Sometimes — when staff has time","Not really — they just disappear","Never thought about it that way"] },
+    { key: 'biggest_pain', question: "What's the ONE thing about running this clinic that you wish would just solve itself?",
+      type: 'text', placeholder: "Billing, lab coordination, repeat patients, anything." }
+  ],
+
+  retail: [
+    { key: 'channels', question: "When a customer asks 'do you have this in size M?' — how long does it take you to actually know?",
+      options: ["Instant — system shows it","A minute or two — staff checks","Five minutes — someone runs to the back","Honestly, sometimes we just guess"] },
+    { key: 'inventory', question: "If I asked you right now what your top 3 best-selling SKUs are this month, could you tell me?",
+      hint: "Without checking. From memory.",
+      options: ["Yes — I track this daily","Roughly, yes","I'd have to dig into receipts","Honestly, no"] },
+    { key: 'support', question: "Of the customers who DM you on Instagram or WhatsApp asking about products — how many ever buy?",
+      options: ["Most of them — we convert well","Maybe half","A small fraction","I don't actually track this"] },
+    { key: 'returns', question: "When someone returns a product or complains, how long does it take to fully resolve?",
+      options: ["Same-day — we have a process","2–3 days","A week or more","It usually drags and the customer gives up"] },
+    { key: 'biggest_pain', question: "What's the ONE retail problem you keep meaning to fix but never have time to?",
+      type: 'text', placeholder: "Stockouts, vendor delays, returns, abandoned carts — be specific." }
+  ],
+
+  wholesale: [
+    { key: 'biz_type', question: "What do you mainly wholesale?",
+      options: ["Food grains / pulses / spices","Hardware / electrical / plumbing","Flooring / tiles / sanitaryware","Textiles / garments","Pharma / FMCG","Auto parts / industrial supplies"] },
+    { key: 'credit', question: "Total udhaari outstanding from your buyers right now — what's the rough number?",
+      hint: "Don't check. Just gut estimate.",
+      options: ["Under ₹2 lakh — tight ship","₹2–10 lakh","₹10–50 lakh","Over ₹50 lakh","Honestly, I'd have to ask my accountant"] },
+    { key: 'overdue', question: "Of that outstanding amount, how much is overdue by 30+ days?",
+      hint: "Money that should already be in your account.",
+      options: ["Almost none","A small portion","A big chunk — it's a real issue","More than I'm comfortable with"] },
+    { key: 'order_intake', question: "If three customers WhatsApp you orders within the same hour, how confident are you that all three get processed correctly?",
+      options: ["Very — system catches them","Mostly — but mistakes happen","Not really — things slip","Honestly, this happens and orders DO get missed"] },
+    { key: 'rate_chaos', question: "When the rate of your top product changes, how long does it take for every salesperson and customer to be on the new rate?",
+      options: ["Instant — auto-updated","Within hours — manual but quick","A day or two","Honestly, mismatches happen and we eat the loss"] },
+    { key: 'dispatch', question: "Today, how do you actually know if yesterday's dispatch reached the customer?",
+      options: ["A system shows the status","Driver / transporter calls us","We call to check","Customer complains if it didn't reach"] },
+    { key: 'biggest_pain', question: "What's the ONE part of this business that costs you sleep on Sunday nights?",
+      type: 'text', placeholder: "Late payments, broker disputes, transport delays, rate fights — anything." }
+  ],
+
+  broker: [
+    { key: 'broker_type', question: "What kind of broking do you primarily do?",
+      options: ["Food grain / pulses broker","Edible oil / oilseed broker","Cotton / textile broker","Spices / dry fruits broker","Property / real estate broker","Industrial commodities broker"] },
+    { key: 'dealflow', question: "If I asked you right now to list every open deal you have running — buyer, seller, quantity, status — could you?",
+      hint: "Without opening the diary or asking your munim.",
+      options: ["Yes — every detail","Mostly — small things might slip","Honestly, no — I'd have to check","I'd be embarrassed to try"] },
+    { key: 'commission', question: "How much commission is currently owed to you that hasn't been paid yet?",
+      hint: "Total figure, including disputes.",
+      options: ["I know exactly","Roughly — within ₹50k","I'd have to calculate it","Honestly, some of it I've probably forgotten"] },
+    { key: 'rate_updates', question: "Every morning, how long does it take you to send today's mandi rates to your network?",
+      options: ["Under 10 minutes — I have a system","15–30 minutes","Over 30 minutes — copy-paste hell","Honestly it's the first hour of my day"] },
+    { key: 'matching', question: "When a buyer calls saying he wants 50 tonnes of toor at a certain rate — how long does it take you to find the right seller?",
+      options: ["Minutes — I know my network cold","An hour or so of calls","A few hours of running around","Sometimes a whole day, and I lose the deal"] },
+    { key: 'bypass', question: "Has a buyer or seller ever bypassed you and dealt directly after you introduced them?",
+      hint: "Be honest — every broker has felt this.",
+      options: ["Never — we have proper agreements","Once or twice — burned me","It happens regularly","More often than I'd like to admit"] },
+    { key: 'biggest_pain', question: "What's the ONE thing in broking that makes you wonder if you should change the way you work?",
+      type: 'text', placeholder: "Payment chasing, party bypassing, rate disputes — be specific." }
+  ],
+
+  manufacturing: [
+    { key: 'quote_time', question: "When a buyer sends an inquiry today, when do they actually get your quote?",
+      hint: "From their inbox to yours, then back to theirs.",
+      options: ["Same day — we move fast","Next day, usually","2–3 days — we're not sure why","It depends — sometimes a week"] },
+    { key: 'won_lost', question: "Of the quotes you sent last month, how many converted into orders?",
+      hint: "Be honest. Don't check.",
+      options: ["Most of them","About half","A small percentage","I genuinely don't track this"] },
+    { key: 'production_track', question: "If a customer calls right now asking 'where is my order?' — how do you actually find out?",
+      options: ["I check a screen — it's all live","I call the supervisor","Supervisor walks to the floor and checks","Honestly, we end up estimating"] },
+    { key: 'support', question: "How much of your production team's day is spent on phone calls answering customer queries — instead of producing?",
+      options: ["Very little — we're protected","An hour or two","Several hours — it's a real drain","More than half the day for some"] },
+    { key: 'rejection', question: "Last quarter — what was your rejection / rework percentage? Top 3 causes?",
+      hint: "If you can't answer this in 10 seconds, that's the real answer.",
+      options: ["I know the numbers cold","Roughly — I have a sense","I'd have to dig and ask","Honestly, we don't track this systematically"] },
+    { key: 'biggest_pain', question: "What's the ONE thing about manufacturing that, if it just disappeared, would change everything?",
+      type: 'text', placeholder: "Material shortage, manpower, vendor delays, complaints — anything." }
+  ],
+
+  realestate: [
+    { key: 'leadflow', question: "Of every 10 leads you get from portals or ads, how many do you actually call back within 30 minutes?",
+      hint: "Speed-to-lead is the entire game in real estate.",
+      options: ["All of them","Most","Maybe half","Honestly, by evening if at all"] },
+    { key: 'qualify', question: "How many site visits last month turned out to be people who were never going to buy?",
+      hint: "Time-wasters disguised as buyers.",
+      options: ["Very few — we qualify well","A few","A lot — it's frustrating","I've stopped counting"] },
+    { key: 'followup', question: "A serious lead from 3 months ago who hasn't decided yet — are they still being followed up?",
+      options: ["Yes — automated reminders","Sometimes — when I remember","Probably not","Definitely not — they're forgotten"] },
+    { key: 'support', question: "How many times a day do you answer the same questions — price, EMI, possession date, amenities?",
+      options: ["Rarely — we have a brochure / page","A few times","Constantly — it's exhausting","All day, every day"] },
+    { key: 'biggest_pain', question: "What's the ONE part of real estate that makes you question this whole hustle?",
+      type: 'text', placeholder: "Time-wasters, builder delays, broker bypass, anything." }
+  ],
+
+  education: [
+    { key: 'inquiries', question: "When a parent fills your inquiry form on a Sunday at 9 PM — when does someone actually reach back to them?",
+      hint: "The answer determines whether they enroll, or with your competitor.",
+      options: ["Within minutes — auto-system","Monday morning","Sometime during the week","Honestly, sometimes we miss them"] },
+    { key: 'fees', question: "How many fee defaulters do you currently have? And how much is overdue?",
+      options: ["I know the exact number","Roughly — within a few","I'd have to ask accounts","More than I'm proud of"] },
+    { key: 'doubt_solving', question: "When a student is stuck on a doubt at 10 PM the night before a test, what actually happens?",
+      options: ["They get help — we have a channel","They WhatsApp the teacher and hope","They wait till next class","They Google it / give up"] },
+    { key: 'parent_comms', question: "How many parent calls / messages does your team handle per week — just for routine updates?",
+      hint: "Attendance, fees, schedules, results.",
+      options: ["Very few — auto-updates","Manageable","A lot — drains my staff","It's basically a full-time job"] },
+    { key: 'biggest_pain', question: "What's the ONE thing about running this institute you wish would just handle itself?",
+      type: 'text', placeholder: "Fees, parents, faculty, admissions — be specific." }
+  ],
+
+  salon: [
+    { key: 'bookings', question: "Right now, do you actually know who's coming in tomorrow — and at what time?",
+      hint: "Without calling someone or opening a WhatsApp chat.",
+      options: ["Yes — clear schedule","Mostly — small gaps","I'd have to check messages","Honestly, no"] },
+    { key: 'no_shows', question: "Last week — how many slots stayed empty because someone didn't show up?",
+      hint: "Each empty premium-time slot = full price, lost.",
+      options: ["Maybe one or two","A handful","Quite a few","It's a real problem"] },
+    { key: 'retention', question: "A regular customer of yours hasn't visited in 6 weeks. Will you ever know — and reach out?",
+      options: ["Yes — we track and follow up","Sometimes","Probably not","We just hope they come back"] },
+    { key: 'support', question: "How much of your reception's day goes to answering 'are you open?', 'what's the price for X?', 'can I book?'",
+      options: ["Very little","A fair bit","Most of the day","All day, every day"] },
+    { key: 'biggest_pain', question: "What's the ONE thing about running this place you wish you could fix forever?",
+      type: 'text', placeholder: "Staff, no-shows, slow days, retention — anything." }
+  ],
+
+  consultant: [
+    { key: 'leadflow', question: "When did a potential client last reach out to you — and how long did it take you to reply?",
+      options: ["Today / yesterday — replied fast","This week — within a day","Last week, replied late","Honestly, I might have ghosted someone"] },
+    { key: 'admin', question: "If you tracked it honestly — how much of your week goes to NON-billable admin?",
+      hint: "Scheduling, invoicing, content, follow-ups.",
+      options: ["Under 20%","About a third","About half","Honestly, more than half"] },
+    { key: 'content', question: "When was your last piece of content — post, video, email — published?",
+      options: ["This week","Within a month","Honestly, a while back","I keep meaning to start"] },
+    { key: 'discovery', question: "If a stranger landed on your profile right now, would they understand exactly what you do and how to hire you in 30 seconds?",
+      options: ["Yes — clear offer, clear CTA","Mostly","Probably not","Definitely not — they'd have to DM me"] },
+    { key: 'biggest_pain', question: "What's the ONE thing that's been holding your practice back for the last 12 months?",
+      type: 'text', placeholder: "Be honest — content, calls, admin, lead chasing, pricing." }
+  ],
+
+  // Generic pack — used when user types a custom industry
+  other: [
+    { key: 'leadflow', question: "Think back to the last 10 leads or inquiries you got. How many did you actually follow up with?",
+      hint: "Most owners are shocked when they count.",
+      options: ["All of them — within a day","Most, but a few slipped","Maybe half — some fell through the cracks","Honestly, I don't even know"] },
+    { key: 'support', question: "Right now, how much of your week disappears into answering the same questions over and over?",
+      options: ["Barely any — handled","A few hours — manageable","A lot — it's the bulk of my day","I've stopped tracking. Too much."] },
+    { key: 'after_hours', question: "When a customer messages you on a Sunday or at 11 PM with a real question, what actually happens?",
+      options: ["They get a reply quickly","They wait, sometimes till next day","They go quiet — and we never know if they came back","Honestly, I haven't thought about it"] },
+    { key: 'systems', question: "Where does the most important info about your business live?",
+      hint: "Customers, payments, orders, follow-ups.",
+      options: ["In a proper software / system","Spread across Excel and WhatsApp","In notebooks, registers, and someone's head","I'd struggle to answer this clearly"] },
+    { key: 'biggest_pain', question: "If you had a free Saturday and could fix ONE thing in your business forever, what would it be?",
+      type: 'text', placeholder: "Be honest. The thing that haunts you on a Sunday night." }
+  ]
+};
+
+/* ===================================================================== */
+
+let flow = [];      // The actual sequence of questions for this user
+let currentQ = 0;
+const answers = {};
+let industryId = null;
+
+/* ===================================================================== */
+
+function startQuiz() {
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('quiz').classList.add('active');
+
+  // Initially flow has just the first 2 questions; pack-specific ones added once industry is chosen.
+  flow = [
+    { key: 'industry', question: "First — what kind of business are you running?",
+      options: INDUSTRIES.map(i => i.label)
+      // Q1 now allows "Other" too so anyone can join
+    },
+    TECH_QUESTION
+  ];
+  currentQ = 0;
+  renderQuestion();
+  window.scrollTo(0, 0);
+}
+
+function buildFlow() {
+  // After industry + tech are chosen, append the right pack
+  const pack = PACKS[industryId] || PACKS.other;
+  flow = flow.concat(pack);
+}
+
+function renderQuestion() {
+  const q = flow[currentQ];
+  const total = flow.length;
+  const container = document.getElementById('questionContainer');
+  document.getElementById('progressFill').style.width = ((currentQ) / total) * 100 + '%';
+  document.getElementById('progressLabel').textContent =
+    String(currentQ + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+
+  let inner = `<div class="question-block active">
+    <div class="q-num">QUESTION ${String(currentQ + 1).padStart(2, '0')}</div>
+    <div class="q-text">${q.question}</div>
+    ${q.hint ? `<div class="q-hint">${q.hint}</div>` : ''}`;
+
+  if (q.type === 'text') {
+    inner += `<textarea class="textarea-input" id="textInput" placeholder="${q.placeholder || ''}">${answers[q.key] || ''}</textarea>`;
+  } else {
+    // Options + optional Other
+    inner += `<div class="options">`;
+    q.options.forEach((opt, i) => {
+      const selected = (answers[q.key] === opt) ? 'selected' : '';
+      const letter = String.fromCharCode(65 + i);
+      inner += `<button class="option ${selected}" data-idx="${i}">
+          <span class="option-marker">${letter}</span>
+          <span class="option-text">${opt}</span>
+        </button>`;
+    });
+    inner += `</div>`;
+
+    if (!q.noOther) {
+      const otherActive = answers[q.key] && !q.options.includes(answers[q.key]);
+      inner += `<div class="other-wrap">
+        <button class="other-toggle ${otherActive ? 'active' : ''}" id="otherToggle">
+          + None of these — type my own
+        </button>
+        <input type="text" class="other-input ${otherActive ? 'visible' : ''}" id="otherInput"
+          placeholder="Type your answer..." value="${otherActive ? answers[q.key] : ''}">
+      </div>`;
+    }
+  }
+
+  inner += `<div class="nav-row"><div class="nav-row-inner">
+      <button class="btn-secondary" onclick="prevQ()" ${currentQ === 0 ? 'disabled' : ''}>← Back</button>
+      <button class="btn-next" id="nextBtn" onclick="nextQ()" ${!answers[q.key] ? 'disabled' : ''}>
+        ${currentQ === flow.length - 1 ? 'Compile file →' : 'Next →'}
+      </button>
+    </div></div></div>`;
+
+  container.innerHTML = inner;
+
+  // Attach listeners
+  if (q.type === 'text') {
+    const ta = document.getElementById('textInput');
+    ta.addEventListener('input', () => {
+      answers[q.key] = ta.value;
+      const btn = document.getElementById('nextBtn');
+      if (btn) btn.disabled = !ta.value.trim();
+    });
+  } else {
+    container.querySelectorAll('.option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        selectOption(q.key, q.options[idx]);
+      });
+    });
+
+    if (!q.noOther) {
+      const toggle = document.getElementById('otherToggle');
+      const input = document.getElementById('otherInput');
+      toggle.addEventListener('click', () => {
+        toggle.classList.toggle('active');
+        input.classList.toggle('visible');
+        if (input.classList.contains('visible')) {
+          // clear any selected option
+          container.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+          input.focus();
+          if (input.value.trim()) answers[q.key] = input.value.trim();
+        } else {
+          if (!q.options.includes(answers[q.key])) delete answers[q.key];
+        }
+        document.getElementById('nextBtn').disabled = !answers[q.key];
+      });
+      input.addEventListener('input', () => {
+        answers[q.key] = input.value.trim();
+        document.getElementById('nextBtn').disabled = !answers[q.key];
+        // If this is the industry question, set industryId for routing
+        if (q.key === 'industry') {
+          industryId = 'other';
+        }
+      });
+    }
+  }
+}
+
+function selectOption(key, value) {
+  answers[key] = value;
+
+  // If this is the industry question, set industryId and prepare to inject pack
+  if (key === 'industry') {
+    const match = INDUSTRIES.find(i => i.label === value);
+    industryId = match ? match.id : 'other';
+  }
+
+  // If this is Q2 (tech), now we have industry+tech — inject the pack
+  if (currentQ === 1 && flow.length === 2) {
+    buildFlow();
+  }
+
+  // Auto-advance
+  if (currentQ < flow.length - 1) {
+    setTimeout(() => {
+      currentQ++;
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 220);
+  } else {
+    renderQuestion();
+  }
+}
+
+function nextQ() {
+  // If next question would require flow expansion (after Q2)
+  if (currentQ === 1 && flow.length === 2) buildFlow();
+
+  if (currentQ < flow.length - 1) {
+    currentQ++;
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    runDiagnosis();
+  }
+}
+
+function prevQ() {
+  if (currentQ > 0) {
+    currentQ--;
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+/* =====================================================================
+   DIAGNOSIS — Local logic, industry-aware. No API.
+   ===================================================================== */
+
+function runDiagnosis() {
+  document.getElementById('quiz').classList.remove('active');
+  document.getElementById('loading').classList.add('active');
+
+  const statuses = [
+    "Compiling your file",
+    "Cross-referencing 200+ AI use cases",
+    "Calculating leak ledger",
+    "Estimating monetary impact",
+    "Sealing recommendations envelope",
+    "File ready"
+  ];
+  let i = 0;
+  const statusEl = document.getElementById('loadingStatus');
+  const interval = setInterval(() => {
+    if (i < statuses.length) {
+      statusEl.innerHTML = statuses[i] + '<span class="blink">_</span>';
+      i++;
+    }
+  }, 850);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    showResults(diagnose(answers));
+  }, 5400);
+}
+
+/* === LEAK LIBRARY ===
+   Each leak: trigger function + title + desc + estimated monthly cost (₹).
+   Costs scale with tech_level and intensity of pain.
+*/
+function diagnose(ans) {
+  const tech = ans.tech_level || '';
+  const techMultiplier =
+    tech.includes('paper') ? 1.4 :
+    tech.includes('Basic') ? 1.2 :
+    tech.includes('Decent') ? 1.0 :
+    0.7; // already digital — leaks are smaller
+
+  // Check helpers
+  const has = (key, term) => (ans[key] || '').toLowerCase().includes(term.toLowerCase());
+
+  const ALL_LEAKS = [];
+
+  // ---- UNIVERSAL LEAKS ----
+  if (has('support', '30+') || has('support', '40+') || has('support', '50+') || has('support', 'most of') || has('support', 'all of') || has('support', 'eating') || has('support', 'whole') || has('support', 'most of my')) {
+    ALL_LEAKS.push({ title: "Repeat-question handling consuming entire workdays",
+      desc: "30+ hours/week on questions that haven't changed in months — that's a salary disguised as customer service.",
+      cost: 75000 });
+  } else if (has('support', '15–30') || has('support', '15-30') || has('support', '20–40') || has('support', '20-40') || has('support', '25–50') || has('support', '25-50')) {
+    ALL_LEAKS.push({ title: "15–30 hours weekly on repetitive customer queries",
+      desc: "Predictable, repeatable, automatable — yet currently being handled by your most expensive resource: people.",
+      cost: 45000 });
+  } else if (has('support', '5–15') || has('support', '5-15') || has('support', '10–20') || has('support', '10-20')) {
+    ALL_LEAKS.push({ title: "5–15 hours/week leaking to repeat queries",
+      desc: "Doesn't feel catastrophic — which is why it never gets fixed. Compounds to 260–780 hours a year.",
+      cost: 22000 });
+  }
+
+  // ---- RESTAURANT ----
+  if (industryId === 'restaurant') {
+    if (has('after_hours', 'wait') || has('after_hours', 'ignored') || has('after_hours', 'competitor')) {
+      ALL_LEAKS.push({ title: "After-hours bookings going to competitors",
+        desc: "Late-night booking decisions — diners message multiple places. Whoever replies first wins. Right now, that's not you.",
+        cost: 35000 });
+    }
+    if (has('orders', 'multiple') || has('orders', 'memory') || has('orders', 'paper')) {
+      ALL_LEAKS.push({ title: "Order chaos across channels",
+        desc: "Swiggy + Zomato + WhatsApp + dine-in + phone — five inboxes, one kitchen. Lost orders are inevitable, not accidental.",
+        cost: 30000 });
+    }
+    if (has('reviews', "don't") || has('reviews', 'remember')) {
+      ALL_LEAKS.push({ title: "Google / Zomato reviews going unanswered",
+        desc: "Every unaddressed bad review = roughly 30 customers reading your silence as guilt. Free reputation is rotting.",
+        cost: 18000 });
+    }
+  }
+
+  // ---- CLINIC ----
+  if (industryId === 'clinic') {
+    if (has('appointments', 'memory') || has('appointments', 'register') || has('appointments', 'mixed')) {
+      ALL_LEAKS.push({ title: "Appointment system riding on receptionist's memory",
+        desc: "Double-bookings, missed slots, forgotten follow-ups. One mistake costs trust that took years to build.",
+        cost: 40000 });
+    }
+    if (has('no_shows', '20–40') || has('no_shows', '20-40') || has('no_shows', 'over 40')) {
+      ALL_LEAKS.push({ title: "Severe no-show rate eating revenue",
+        desc: "Empty slots can't be resold. Each no-show is the entire fee plus the operational cost of holding that slot.",
+        cost: 60000 });
+    }
+    if (has('followup', 'never') || has('followup', 'sometimes') || has('followup', 'follow-up')) {
+      ALL_LEAKS.push({ title: "Patient follow-up gap losing repeat visits",
+        desc: "Reports collected and forgotten. Repeat checkups not booked. Revenue per patient is half what it should be.",
+        cost: 35000 });
+    }
+  }
+
+  // ---- RETAIL ----
+  if (industryId === 'retail') {
+    if (has('inventory', 'notebook') || has('inventory', "don't")) {
+      ALL_LEAKS.push({ title: "Inventory invisibility is killing your margins",
+        desc: "Stock-outs lose sales. Overstock locks up cash. Without real-time visibility, you're guessing — and guessing always costs more than knowing.",
+        cost: 50000 });
+    }
+    if (has('returns', 'painfully') || has('returns', 'avoid')) {
+      ALL_LEAKS.push({ title: "Returns process eating staff hours",
+        desc: "A bad returns experience kills repeat purchase rate. Smooth ones build lifetime customers. Yours is currently neither.",
+        cost: 25000 });
+    }
+  }
+
+  // ---- WHOLESALE ----
+  if (industryId === 'wholesale') {
+    if (has('credit', 'manual') || has('credit', 'bahi') || has('credit', 'excel')) {
+      ALL_LEAKS.push({ title: "Outstanding payments tracked in ledgers / Excel",
+        desc: "Udhaari without automated reminders means 30-day payments become 60. 60 becomes 90. Working capital is silently bleeding into customer balance sheets.",
+        cost: 80000 });
+    }
+    if (has('order_intake', 'phone') || has('order_intake', 'reps') || has('order_intake', 'email') || has('order_intake', 'mix')) {
+      ALL_LEAKS.push({ title: "Order intake scattered across phone, WhatsApp, email",
+        desc: "Orders missed, mis-recorded, or lost in chats. No central view = no real forecasting = excess buying.",
+        cost: 55000 });
+    }
+    if (has('rate_chaos', 'daily') || has('rate_chaos', 'weekly')) {
+      ALL_LEAKS.push({ title: "Rate updates handled manually, multiple times a day",
+        desc: "Every price change requires re-quoting customers manually. Your margin gets eroded by every minute of delay.",
+        cost: 35000 });
+    }
+    if (has('dispatch', 'phone') || has('dispatch', 'whatsapp') || has('dispatch', 'register')) {
+      ALL_LEAKS.push({ title: "Dispatch and transporter coordination running on calls",
+        desc: "Every truck delay, wrong delivery, or missing LR is reactive firefighting. No system = no early warnings.",
+        cost: 30000 });
+    }
+  }
+
+  // ---- BROKER ----
+  if (industryId === 'broker') {
+    if (has('dealflow', 'diary') || has('dealflow', 'memory') || has('dealflow', 'excel')) {
+      ALL_LEAKS.push({ title: "Deal pipeline running on diary + memory",
+        desc: "Buyers and sellers slip through the cracks. Deals that could close in 2 days take 2 weeks because nothing is centralised.",
+        cost: 60000 });
+    }
+    if (has('commission', 'head') || has('commission', 'notebook') || has('commission', 'excel')) {
+      ALL_LEAKS.push({ title: "Commissions tracked manually — leaking unclaimed money",
+        desc: "When commission tracking lives in a notebook, parties forget, dispute, or simply don't pay. Every month, real rupees go unclaimed.",
+        cost: 45000 });
+    }
+    if (has('rate_updates', 'manually') || has('rate_updates', 'forwards') || has('rate_updates', 'phone') || has('rate_updates', 'sms')) {
+      ALL_LEAKS.push({ title: "Daily rate broadcasts done manually each morning",
+        desc: "30–60 minutes daily = 200+ hours/year on copy-pasting rates. Meanwhile competitors are using one-click broadcasts.",
+        cost: 22000 });
+    }
+    if (has('matching', '3–6') || has('matching', '3-6') || has('matching', 'most')) {
+      ALL_LEAKS.push({ title: "Half your day spent matching parties manually",
+        desc: "The matching itself is your skill, but the searching, sorting, and recall is automation work being done by a brain.",
+        cost: 50000 });
+    }
+  }
+
+  // ---- MANUFACTURING ----
+  if (industryId === 'manufacturing') {
+    if (has('quote_time', 'days') || has('quote_time', 'week') || has('quote_time', 'inconsistent')) {
+      ALL_LEAKS.push({ title: "Quotation turnaround killing conversion",
+        desc: "B2B buyers compare 3–5 vendors. Whoever quotes fastest with cleanest specs usually wins. Slow quotes = lost deals you'll never know about.",
+        cost: 70000 });
+    }
+    if (has('production_track', 'verbally') || has('production_track', 'paper') || has('production_track', 'excel')) {
+      ALL_LEAKS.push({ title: "Production status updates traveling through humans",
+        desc: "Owner asks supervisor → supervisor asks foreman → foreman walks to floor. By the time the answer arrives, it's already old.",
+        cost: 45000 });
+    }
+    if (has('rejection', 'memory') || has('rejection', 'register') || has('rejection', 'excel')) {
+      ALL_LEAKS.push({ title: "Quality rejection patterns invisible",
+        desc: "Without trended data, you fix incidents instead of root causes. Same defect, same vendor, same operator — repeating quietly.",
+        cost: 40000 });
+    }
+  }
+
+  // ---- REAL ESTATE ----
+  if (industryId === 'realestate') {
+    if (has('qualify', 'whoever') || has('qualify', 'mixed')) {
+      ALL_LEAKS.push({ title: "Showings happening without qualification",
+        desc: "Driving across the city for buyers who were never going to buy. Time is the most expensive commodity in real estate.",
+        cost: 50000 });
+    }
+    if (has('followup', 'never') || has('followup', 'memory') || has('followup', 'excel')) {
+      ALL_LEAKS.push({ title: "Old leads going cold without nurture",
+        desc: "Real estate decisions take 90+ days. Without consistent follow-up, the lead closes — but with whoever stayed in touch.",
+        cost: 80000 });
+    }
+  }
+
+  // ---- EDUCATION ----
+  if (industryId === 'education') {
+    if (has('fees', 'manual') || has('fees', 'excel')) {
+      ALL_LEAKS.push({ title: "Fee collection running on manual reminders",
+        desc: "Defaulters compound. A WhatsApp reminder sent automatically gets paid. A staff call gets dodged. Math is brutal.",
+        cost: 50000 });
+    }
+    if (has('inquiries', 'phone') || has('inquiries', 'walk') || has('inquiries', 'mix')) {
+      ALL_LEAKS.push({ title: "Admission inquiry conversion leaking",
+        desc: "Most coaching institutes lose 60–70% of inquiries because nobody followed up the same day. Your inquiry pipeline is a sieve.",
+        cost: 40000 });
+    }
+  }
+
+  // ---- SALON ----
+  if (industryId === 'salon') {
+    if (has('no_shows', '20–40') || has('no_shows', '20-40') || has('no_shows', 'over 40')) {
+      ALL_LEAKS.push({ title: "No-shows draining premium-time slots",
+        desc: "A weekend slot gone at 11 AM can't be resold by 12. Every no-show is full fee + opportunity cost.",
+        cost: 35000 });
+    }
+    if (has('retention', "don't") || has('retention', 'word')) {
+      ALL_LEAKS.push({ title: "Zero structured retention — relying on remembrance",
+        desc: "Salons make 80% of revenue from 20% of customers. Without a recall system, you're rebuilding loyalty every quarter.",
+        cost: 30000 });
+    }
+  }
+
+  // ---- CONSULTANT ----
+  if (industryId === 'consultant') {
+    if (has('admin', '15–25') || has('admin', '15-25') || has('admin', '25+')) {
+      ALL_LEAKS.push({ title: "Admin work eating billable hours",
+        desc: "Every hour on scheduling and invoicing is an hour not on client work or thought leadership. The math compounds savagely as you scale.",
+        cost: 60000 });
+    }
+    if (has('content', 'inconsistent') || has('content', "don't")) {
+      ALL_LEAKS.push({ title: "Inconsistent content = no top-of-funnel",
+        desc: "For a personal brand business, content silence is invisibility. Inbound leads dry up the month after posting stops.",
+        cost: 40000 });
+    }
+    if (has('discovery', 'figure') || has('discovery', 'dm')) {
+      ALL_LEAKS.push({ title: "No clear discovery path — leads bouncing",
+        desc: "If a curious prospect can't figure out your offer in 30 seconds, they're gone. You're paying the cost of awareness without harvesting it.",
+        cost: 35000 });
+    }
+  }
+
+  // ---- ALWAYS ADD AT LEAST 3 ----
+  if (ALL_LEAKS.length < 3) {
+    ALL_LEAKS.push({ title: "Manual operations are your biggest hidden overhead",
+      desc: "Across your business, hours spent on repetitive predictable work add up to a salary you're paying in time, not money.",
+      cost: 25000 });
+  }
+
+  // Take top 4
+  const leaks = ALL_LEAKS.slice(0, 4).map(l => ({
+    ...l,
+    cost: Math.round(l.cost * techMultiplier / 1000) * 1000
+  }));
+
+  const total = leaks.reduce((s, l) => s + l.cost, 0);
+
+  // ---- VERDICT ----
+  let verdict;
+  if (total >= 200000) {
+    verdict = `Your business is leaking <em>~₹${formatINR(total)}+ every month</em> through manual work that AI now handles in seconds.`;
+  } else if (total >= 100000) {
+    verdict = `Your business is quietly losing <em>~₹${formatINR(total)} every month</em> — money you're paying in time, attention, and missed opportunities.`;
+  } else {
+    verdict = `Your business is bleeding <em>~₹${formatINR(total)} a month</em> through small, fixable leaks. The numbers compound brutally over a year.`;
+  }
+
+  // ---- STRENGTHS ----
+  const strengths = [];
+  if (tech.includes('Decent') || tech.includes('digital')) {
+    strengths.push("You already think in systems — that's the hardest part.");
+  }
+  if (industryId === 'restaurant' && (has('orders', 'POS') || has('orders', 'system'))) {
+    strengths.push("Your POS is already capturing data — most restaurants don't even have that.");
+  }
+  if (industryId === 'wholesale' && (has('credit', 'tally') || has('credit', 'erp'))) {
+    strengths.push("Your books are already digital. Layering AI on top is fast, not foundational.");
+  }
+  if (industryId === 'broker' && has('dealflow', 'crm')) {
+    strengths.push("A CRM is rare in broking. You're already ahead of 90% of your competitors.");
+  }
+  if (has('biggest_pain', '') && (ans.biggest_pain || '').length > 30) {
+    strengths.push("You can articulate exactly what's broken — that clarity is half the work.");
+  }
+  if (strengths.length < 2) {
+    strengths.push("You took a 3-minute audit instead of dismissing it — that says everything about how you operate.");
+  }
+  if (strengths.length < 2) {
+    strengths.push("Your pain points are concrete, not abstract. Concrete problems get solved fast.");
+  }
+
+  return { verdict, leaks, total, strengths: strengths.slice(0, 3) };
+}
+
+function formatINR(n) {
+  // Format as Indian-style: 1,23,456
+  const s = String(n);
+  if (s.length <= 3) return s;
+  const last3 = s.slice(-3);
+  const rest = s.slice(0, -3);
+  return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3;
+}
+
+/* ===================================================================== */
+
+function showResults(d) {
+  document.getElementById('loading').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+
+  // File metadata
+  const fileNo = String(Math.floor(Math.random() * 900) + 100) + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+  document.getElementById('fileNo').textContent = fileNo;
+  document.getElementById('fileDate').textContent = 'DATE / ' + dateStr;
+  const subjectLabel = (INDUSTRIES.find(i => i.id === industryId) || {}).label || 'Your business';
+  document.getElementById('fileSubject').textContent = subjectLabel;
+
+  // Verdict
+  document.getElementById('verdictText').innerHTML = d.verdict;
+
+  // Leaks
+  document.getElementById('leakItems').innerHTML = d.leaks.map(l => `
+    <div class="leak-item">
+      <div>
+        <div class="leak-title">${l.title}</div>
+        <div class="leak-desc">${l.desc}</div>
+      </div>
+      <div class="leak-cost">~₹${formatINR(l.cost)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('totalLeak').textContent = '~₹' + formatINR(d.total);
+
+  // Strengths
+  document.getElementById('strengthLines').innerHTML = d.strengths.map(s =>
+    `<div class="strength-line">${s}</div>`
+  ).join('');
+
+  // WhatsApp link
+  const summary = `Hi! I just took your AI Audit.
+
+File #: ${fileNo}
+Business: ${subjectLabel}
+Estimated monthly leak: ~₹${formatINR(d.total)}
+
+Biggest issue flagged: ${d.leaks[0]?.title || 'see file'}
+
+I'd like to take you up on the free 30-min call to figure out how to fix this.`;
+  const wa = `https://wa.me/919999999999?text=${encodeURIComponent(summary)}`;
+  document.getElementById('whatsappCta').href = wa;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
