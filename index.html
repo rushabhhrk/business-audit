@@ -503,6 +503,45 @@
     to { transform: translateX(-50%); }
   }
 
+  /* ── TABS ── */
+  .tabs-bar {
+    position: sticky;
+    top: 64px;
+    z-index: 50;
+    background: rgba(10,10,8,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 3rem;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--grey);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .tab-btn:hover { color: var(--offwhite); border-color: var(--lightgrey); }
+  .tab-btn.active {
+    color: var(--black);
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeUp 0.5s forwards; }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     nav { padding: 0.85rem 1.25rem; }
@@ -543,6 +582,8 @@
     footer > div:last-child { align-items: center !important; }
     footer > div:last-child > div:last-child { text-align: center !important; }
     .ticker-item { font-size: 13px; padding: 0 1.25rem; }
+    .tabs-bar { padding: 0.6rem 1rem; top: 56px; gap: 0.4rem; }
+    .tab-btn { font-size: 10px; padding: 7px 12px; letter-spacing: 0.08em; }
     /* hide custom cursor on touch devices */
     .cursor, .cursor-ring { display: none; }
   }
@@ -571,12 +612,13 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">dash<span>.agentcy</span></a>
+  <a href="#" class="nav-logo" data-tab="about">dash<span>.agentcy</span></a>
   <ul class="nav-links">
-    <li><a href="#vision">Vision</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#difference">Why Us</a></li>
-    <li><a href="#process">Process</a></li>
+    <li><a href="#" data-tab="about">About</a></li>
+    <li><a href="#" data-tab="services">Services</a></li>
+    <li><a href="#" data-tab="why">Why Us</a></li>
+    <li><a href="#" data-tab="industries">Industries</a></li>
+    <li><a href="#" data-tab="process">Process</a></li>
   </ul>
   <a href="#cta" class="nav-cta">Get Started</a>
 </nav>
@@ -641,8 +683,17 @@
   </div>
 </div>
 
-<!-- VISION & MISSION -->
-<section id="vision">
+<!-- TABS BAR -->
+<div class="tabs-bar" id="tabsBar">
+  <button class="tab-btn active" data-tab="about">About</button>
+  <button class="tab-btn" data-tab="services">Services</button>
+  <button class="tab-btn" data-tab="why">Why Us</button>
+  <button class="tab-btn" data-tab="industries">Industries</button>
+  <button class="tab-btn" data-tab="process">Process</button>
+</div>
+
+<!-- ABOUT (Vision & Mission) -->
+<section id="vision" class="tab-panel active" data-panel="about">
   <div class="section-tag reveal">Vision & Mission</div>
   <h2 class="section-title reveal">What We <span class="accent">Stand For</span></h2>
   <p class="section-sub reveal">Every decision we make, every system we build — it all comes back to one belief.</p>
@@ -685,10 +736,8 @@
   </div>
 </section>
 
-<div class="divider"></div>
-
 <!-- HOW WE'RE DIFFERENT -->
-<section id="difference" class="diff-section">
+<section id="difference" class="diff-section tab-panel" data-panel="why">
   <div class="section-tag reveal">Why dash.agentcy</div>
   <h2 class="section-title reveal">Not An Agency.<br><span style="color: var(--teal-dim);">An Operating System.</span></h2>
   <p class="section-sub reveal">Traditional agencies charge you for hours and hand you deliverables. We charge for outcomes and hand you running systems. Here's the difference.</p>
@@ -734,7 +783,7 @@
 </section>
 
 <!-- SERVICES -->
-<section id="services">
+<section id="services" class="tab-panel" data-panel="services">
   <div class="section-tag reveal">What We Build</div>
   <h2 class="section-title reveal">Our <span class="accent">Services</span></h2>
   <p class="section-sub reveal">Every service is a system — not a one-time task. Built to run, built to scale, built to save you time and money.</p>
@@ -820,9 +869,7 @@
   </div>
 </section>
 
-<div class="divider"></div>
-
-<section>
+<section class="tab-panel" data-panel="industries">
   <div class="section-tag reveal">Industries</div>
   <h2 class="section-title reveal">Who We <span class="accent">Work With</span></h2>
   <p class="section-sub reveal">We specialise in businesses where AI creates the most immediate, measurable impact.</p>
@@ -857,7 +904,7 @@
 </section>
 
 <!-- HOW IT WORKS -->
-<section id="process">
+<section id="process" class="tab-panel" data-panel="process">
   <div class="section-tag reveal">Process</div>
   <h2 class="section-title reveal">How It <span class="accent">Works</span></h2>
   <p class="section-sub reveal">From first conversation to live system in under 3 weeks.</p>
@@ -897,8 +944,7 @@
     </div>
     <p class="cta-sub">Start with a free 2-week pilot. No contracts. No risk. Just results.</p>
     <div class="cta-buttons">
-      <a href="https://www.instagram.com/dash.agentcy" class="btn-primary" target="_blank">Start Free Pilot →</a>
-      <a href="https://wa.me/917378691925" class="btn-outline" target="_blank">WhatsApp Us</a>
+      <a href="https://wa.me/917378691925?text=Hi%2C%20I%20want%20to%20know%20more%20about%20dash.agentcy%20and%20the%20free%202-week%20pilot." class="btn-primary" target="_blank">Start Free Pilot →</a>
     </div>
   </div>
 </section>
@@ -947,16 +993,36 @@
   }, { threshold: 0.12 });
   reveals.forEach(el => observer.observe(el));
 
-  // Nav active link
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(s => {
-      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+  // Tab switching
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  const tabTriggers = document.querySelectorAll('[data-tab]');
+
+  function activateTab(tabName) {
+    tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+    tabPanels.forEach(p => {
+      const isActive = p.dataset.panel === tabName;
+      p.classList.toggle('active', isActive);
+      if (isActive) {
+        // re-trigger reveals inside panel
+        p.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+      }
     });
-    navLinks.forEach(a => {
-      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--teal)' : '';
+    const tabsBar = document.getElementById('tabsBar');
+    if (tabsBar) {
+      const y = tabsBar.getBoundingClientRect().top + window.scrollY - 64;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+  });
+  tabTriggers.forEach(el => {
+    if (el.classList.contains('tab-btn')) return;
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      activateTab(el.dataset.tab);
     });
   });
 </script>
